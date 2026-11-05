@@ -403,6 +403,11 @@ function animate() {
 
     requestAnimationFrame(animate);
 
+    let pos = [];
+    if (player) {
+        pos = player.position.clone();
+    }
+
     let walking = false;
 
     //player movement
@@ -444,6 +449,30 @@ function animate() {
             const action = playerMixer.clipAction(playerGLTF.animations[4]);
             action.play();
         }
+    }
+
+    //check player collision
+    objects.forEach((obstacle) => {
+        const playerBox = new THREE.Box3().setFromObject(player);
+        const obstacleBox = new THREE.Box3().setFromObject(obstacle);
+
+        if (playerBox.intersectsBox(obstacleBox)) {
+            player.position.copy(pos);
+        }
+    });
+
+    //check world borders
+    if (player.position.x < -50) {
+        player.position.x = -50;
+    }
+    if (player.position.x > 50) {
+        player.position.x = 50;
+    }
+    if (player.position.z < -50) {
+        player.position.z = -50;
+    }  
+    if (player.position.z > 50) {
+        player.position.z = 50;
     }
 
     const delta = clock.getDelta();
