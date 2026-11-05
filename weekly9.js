@@ -8,6 +8,10 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const loader = new GLTFLoader();
+let mixer;
+const clock = new THREE.Clock();
+
+const objects = [];
 
 //Texture Loader + Textures
 
@@ -166,6 +170,7 @@ leftWall.scale.set(1, 6, 8);
 leftWall.position.set(-20, 2, 8);
 leftWall.castShadow = true;
 scene.add(leftWall);
+objects.push(leftWall);
 
 const leftBackWall = new THREE.Mesh(cubeGeometry, wallMaterial);
 leftBackWall.scale.set(1, 6, 3);
@@ -173,12 +178,14 @@ leftBackWall.rotation.y = Math.PI / 2;
 leftBackWall.position.set(-12, 2, -8);
 leftBackWall.castShadow = true;
 scene.add(leftBackWall);
+objects.push(leftBackWall);
 
 const rightWall = new THREE.Mesh(cubeGeometry, wallMaterial);
 rightWall.scale.set(1, 6, 8);
 rightWall.position.set(20, 2, 8);
 rightWall.castShadow = true;
 scene.add(rightWall);
+objects.push(rightWall);
 
 const rightBackWall = new THREE.Mesh(cubeGeometry, wallMaterial);
 rightBackWall.scale.set(1, 6, 3);
@@ -186,6 +193,7 @@ rightBackWall.rotation.y = Math.PI / 2;
 rightBackWall.position.set(12, 2, -8);
 rightBackWall.castShadow = true;
 scene.add(rightBackWall);
+objects.push(rightBackWall);
 
 //Gate
 const gate = new THREE.Mesh(cubeGeometry, woodMaterial);
@@ -194,6 +202,7 @@ gate.rotation.y = Math.PI / 2;
 gate.position.set(0, 2, -8);
 gate.castShadow = true;
 scene.add(gate);
+objects.push(gate);
 
 //Banners
 const banner = new THREE.Mesh(cubeGeometry, bannerMaterial);
@@ -202,6 +211,7 @@ banner.rotation.y = Math.PI / 2;
 banner.position.set(-12, 8, -6);
 banner.castShadow = true;
 scene.add(banner);
+objects.push(banner);
 
 const banner2 = new THREE.Mesh(cubeGeometry, bannerMaterial);
 banner2.scale.set(0.5, 2, 1);
@@ -209,6 +219,7 @@ banner2.rotation.y = Math.PI / 2;
 banner2.position.set(12, 8, -6);
 banner2.castShadow = true;
 scene.add(banner2);
+objects.push(banner2);
 
 //crates
 const crate1 = new THREE.Mesh(cubeGeometry, woodMaterial);
@@ -216,30 +227,35 @@ crate1.scale.set(0.5, 0.5, 0.5);
 crate1.position.set(-5, 1, -5);
 crate1.castShadow = true;
 scene.add(crate1);
+objects.push(crate1);
 
 const crate2 = new THREE.Mesh(cubeGeometry, woodMaterial);
 crate2.scale.set(1, 1, 1);
 crate2.position.set(-8, 2, -4);
 crate2.castShadow = true;
 scene.add(crate2);
+objects.push(crate2);
 
 const crate3 = new THREE.Mesh(cubeGeometry, woodMaterial);
 crate3.scale.set(0.5, 0.5, 0.5);
 crate3.position.set(-8, 1, 0);
 crate3.castShadow = true;
 scene.add(crate3);
+objects.push(crate3);
 
 const crate4 = new THREE.Mesh(cubeGeometry, woodMaterial);
 crate4.scale.set(0.5, 0.5, 0.5);
 crate4.position.set(-9, 5, -5);
 crate4.castShadow = true;
 scene.add(crate4);
+objects.push(crate4);
 
 const crate5 = new THREE.Mesh(cubeGeometry, woodMaterial);
 crate5.scale.set(0.5, 0.5, 0.5);
 crate5.position.set(8, 1, -4);
 crate5.castShadow = true;
 scene.add(crate5);
+objects.push(crate5);
 
 //fountain
 //poly pizza https://poly.pizza/m/7AydBrjR2Ss
@@ -248,6 +264,34 @@ loader.load('models/fountain.glb', function(gltf) {
     fountain.position.set(0, 0, 10);
     fountain.scale.set(1, 1, 1);
     scene.add(fountain);
+    objects.push(fountain);
+});
+
+//donkey
+//poly pizza https://poly.pizza/m/qmX6nhnvp7
+loader.load('models/donkey.glb', function(gltf) {
+    const donkey = gltf.scene;
+    donkey.position.set(13, 0, 0);
+    donkey.scale.set(1, 1, 1);
+    donkey.rotation.y = Math.PI * 3 / 2;
+    scene.add(donkey);
+    objects.push(donkey);
+
+    //animations
+    mixer = new THREE.AnimationMixer(gltf.scene);
+    const action =
+    mixer.clipAction(gltf.animations[11]);
+    action.play();
+});
+
+//hay
+//poly pizza https://poly.pizza/m/Yu8TOERkpw
+loader.load('models/hay.glb', function(gltf) {
+    const hay = gltf.scene;
+    hay.position.set(15, 0, -4);
+    hay.scale.set(15, 15, 15);
+    scene.add(hay);
+    objects.push(hay);
 });
 
 // ----------------------------------------------------
@@ -255,7 +299,7 @@ loader.load('models/fountain.glb', function(gltf) {
 // ----------------------------------------------------
 const ambientLight = new THREE.AmbientLight(
     0xffffff,
-    0.5
+    1
 );
 
 
@@ -321,6 +365,11 @@ window.addEventListener("resize", () => {
 function animate() {
 
     requestAnimationFrame(animate);
+
+    const delta = clock.getDelta();
+    if (mixer) {
+        mixer.update(delta);
+    }
 
     //cube.rotation.y += 0.01;
 
