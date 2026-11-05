@@ -3,8 +3,11 @@
 //10/27/26
 
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const loader = new GLTFLoader();
 
 //Texture Loader + Textures
 
@@ -238,6 +241,15 @@ crate5.position.set(8, 1, -4);
 crate5.castShadow = true;
 scene.add(crate5);
 
+//fountain
+//poly pizza https://poly.pizza/m/7AydBrjR2Ss
+loader.load('models/fountain.glb', function(gltf) {
+    const fountain = gltf.scene;
+    fountain.position.set(0, 0, 10);
+    fountain.scale.set(1, 1, 1);
+    scene.add(fountain);
+});
+
 // ----------------------------------------------------
 // Ambient Light
 // ----------------------------------------------------
@@ -264,10 +276,10 @@ scene.add(directionalLight);
 
 const pointLight = new THREE.PointLight(
     0xffffff,
-    50
+    200
 );
 
-pointLight.position.set(0, 5, 0);
+pointLight.position.set(-5, 5, 10);
 pointLight.castShadow = true;
 
 scene.add(pointLight);
