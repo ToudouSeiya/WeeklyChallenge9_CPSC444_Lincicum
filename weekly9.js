@@ -9,6 +9,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const loader = new GLTFLoader();
 let mixer;
+let playerMixer;
 const clock = new THREE.Clock();
 
 const objects = [];
@@ -261,7 +262,7 @@ objects.push(crate5);
 //poly pizza https://poly.pizza/m/7AydBrjR2Ss
 loader.load('models/fountain.glb', function(gltf) {
     const fountain = gltf.scene;
-    fountain.position.set(0, 0, 10);
+    fountain.position.set(0, 0, 15);
     fountain.scale.set(1, 1, 1);
     scene.add(fountain);
     objects.push(fountain);
@@ -293,6 +294,27 @@ loader.load('models/hay.glb', function(gltf) {
     scene.add(hay);
     objects.push(hay);
 });
+
+
+//Player
+let player;
+let playerGLTF;
+//poly pizza https://poly.pizza/m/5EGWBMpuXq
+loader.load('models/player.glb', function(gltf) {
+    const char = gltf.scene;
+    playerGLTF = gltf;
+    char.position.set(0, 0, 0);
+    char.scale.set(3, 3, 3);
+    scene.add(char);
+
+    //animations
+    playerMixer = new THREE.AnimationMixer(gltf.scene);
+    const action = playerMixer.clipAction(gltf.animations[4]);
+    action.play();
+
+    player = char;
+});
+
 
 // ----------------------------------------------------
 // Ambient Light
@@ -360,20 +382,83 @@ window.addEventListener("resize", () => {
 });
 
 // ----------------------------------------------------
+//Keyboard Controls
+// ----------------------------------------------------
+const keys = {};
+window.addEventListener("keydown", (e) => {
+    keys[e.key] = true;
+});
+window.addEventListener("keyup", (e) => {
+    keys[e.key] = false;
+});
+
+
+// ----------------------------------------------------
 // Animation Loop
 // ----------------------------------------------------
+const speed = 0.2;
+let lastAction = false;
+
 function animate() {
 
     requestAnimationFrame(animate);
+
+    let walking = false;
+
+    //player movement
+    if(keys["ArrowUp"] || keys["w"]){
+        player.position.z -= speed;
+        player.rotation.y = Math.PI;
+        walking = true;
+    }
+    else if(keys["ArrowDown"]|| keys["s"]){
+        player.position.z += speed;
+        player.rotation.y = 0;
+        walking = true;
+    }
+    else if(keys["ArrowLeft"]|| keys["a"]){
+        player.position.x -= speed;
+        player.rotation.y = Math.PI * 3 /2;
+        walking = true;
+    }
+    else if(keys["ArrowRight"]|| keys["d"]){
+        player.position.x += speed;
+        player.rotation.y = Math.PI /2;
+        walking = true;
+    }
+
+    if (playerMixer) {
+        if(walking){
+            if (!lastAction) {
+                const action = playerMixer.clipAction(playerGLTF.animations[4]);
+                action.stop();
+            }
+            const walk = playerMixer.clipAction(playerGLTF.animations[22]);
+            walk.play();  
+        }
+        else{
+            if (lastAction) {
+                const action = playerMixer.clipAction(playerGLTF.animations[22]);
+                action.stop();
+            }
+            const action = playerMixer.clipAction(playerGLTF.animations[4]);
+            action.play();
+        }
+    }
 
     const delta = clock.getDelta();
     if (mixer) {
         mixer.update(delta);
     }
+    if (playerMixer) {
+        playerMixer.update(delta);
+    }
 
     //cube.rotation.y += 0.01;
 
     controls.update();
+
+    lastAction = walking;
 
     renderer.render(scene, camera);
 }
