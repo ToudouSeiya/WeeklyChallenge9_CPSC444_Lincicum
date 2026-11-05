@@ -1,1 +1,2 @@
-# WeeklyChallenge9_CPSC444_Lincicum
+# WEBGLWeekly9
+Morgan Lincicum
